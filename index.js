@@ -48,6 +48,7 @@ const fetchToilets = () => {
     return fetch("./toilets.json")
     .then(res => res.json())
     .then(json => {
+        console.log(json)
         return json;
     });
 }
@@ -113,7 +114,9 @@ const renderToilets = (jsonData) => {
           };
           return L.circleMarker(latlng, geojsonMarkerOptions);
         }
-      }).addTo(mymap);
+      , onEachFeature: function(feature, featureLayer) {
+            featureLayer.bindPopup(feature.properties.desc +'<br>' + feature.properties.soort);
+    }}).addTo(mymap);
 }
 
 createToilets()
@@ -145,3 +148,4 @@ var popup = L.popup();
 // }
 
 // mymap.on('click', onMapClick);
+mymap.on('click', function(e) { console.log(e) });
