@@ -1,0 +1,9 @@
+body {
+  margin: 0px;
+  overflow: hidden;
+}
+h1 {
+  text-align: center;
+}
+
+#mapid { height: 1000px; }
