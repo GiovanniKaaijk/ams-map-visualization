@@ -92,12 +92,13 @@ header {
     width: 150px;
   }
   .leaflet-bottom .leaflet-control.legend {
-    margin: 0;
-    margin-left: 30px;
+    margin: auto;
     margin-bottom: 16px;
   }
   .leaflet-bottom {
     bottom: 40px;
+    width: 100%;
+    display: flex;
   }
 }
 @media only screen and (max-width: 450px) {
