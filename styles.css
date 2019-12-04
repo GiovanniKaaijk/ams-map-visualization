@@ -5,6 +5,8 @@ body {
 h1 {
   text-align: center;
   font-family: Helvetica, sans-serif;
+  color: rgb(46,49,146);
+  margin-bottom: 4px;
 }
 
 .leaflet-bottom .leaflet-control.legend {
@@ -49,4 +51,17 @@ path {
 
 .reset {
   margin-left: auto;
+}
+
+header {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  padding: 10px;
+}
+.logo {
+  width: 200px;
+  height: auto;
+  display: block;
+  margin: auto;
+  margin-top: -20px;
 }
