@@ -38,3 +38,15 @@ path {
   opacity: 0;
   pointer-events: none;
 }
+
+.clicked {
+  font-weight: bold;
+}
+
+.labels {
+  display: flex;
+}
+
+.reset {
+  margin-left: auto;
+}

@@ -16,7 +16,7 @@ let grayscale = L.tileLayer(mapboxUrl, {
           "pk.eyJ1IjoiZ2lvdmFubmlrYWFpamsiLCJhIjoiY2szcTR0cGJjMDlqcjNpbmpzY3FvNnM2NyJ9.ZjrOail8vBggoDZ6_btYAg"
       });
 let mymap = L.map("mapid", {layers: [grayscale]}).setView([52.369189, 4.899431], 14);
-let toiletsKinds = ['Amsterdamse krul (m)','Gewenst toilet','Urilift (m)','Openbaar toilet (m/v)','Openbaar toilet, toegankelijk voor mindervaliden (m/v)', 'Onzeker', 'Seizoen (m/v)','Toilet in parkeergarage (m/v)'];
+let toiletsKinds = ['Amsterdamse krul (m)','Urilift (m)','Openbaar toilet (m/v)','Openbaar toilet, toegankelijk voor mindervaliden (m/v)', 'Seizoen (m/v)','Toilet in parkeergarage (m/v)'];
 var baseMaps = {
     "Grayscale": grayscale,
     "Streets": streets
@@ -47,15 +47,11 @@ let thisnewcolor;
           return thisnewcolor;
         }
         case "Openbaar toilet (m/v)": {
-            thisnewcolor = "#addd8e";
+            thisnewcolor = "#31a354";
           return thisnewcolor;
         }
         case "Openbaar toilet, toegankelijk voor mindervaliden (m/v)": {
             thisnewcolor = "#7fcdbb";
-          return thisnewcolor;
-        }
-        case "Onzeker": {
-            thisnewcolor = "#fa9fb5";
           return thisnewcolor;
         }
         case "Seizoen (m/v)": {
@@ -133,8 +129,8 @@ const transformToilets = (json) => {
 
 
 
-const renderToilets = (jsonData) => {
-    L.geoJSON(jsonData, {
+const renderToilets = async (jsonData) => {
+    await L.geoJSON(jsonData, {
         pointToLayer: function(feature, latlng) {
           var geojsonMarkerOptions = {
             radius: 8,
@@ -142,13 +138,15 @@ const renderToilets = (jsonData) => {
             color: "#000",
             weight: 1,
             opacity: 1,
-            fillOpacity: 0.8
+            fillOpacity: 0.8,
+            className: 'marker ' + feature.properties.soort
           };
           return L.circleMarker(latlng, geojsonMarkerOptions);
         }
       , onEachFeature: function(feature, featureLayer) {
             featureLayer.bindPopup(feature.properties.desc +'<br>' + feature.properties.soort + '<br>' + 'Open: ' + feature.properties.open);
     }}).addTo(mymap);
+    bindToilets();
 }
 
 createToilets()
@@ -184,7 +182,7 @@ let legend = L.control({position: 'bottomleft'});
     legend.onAdd = function (map) {
 
     let div = L.DomUtil.create('div', 'info legend');
-    labels = ['<strong>Soort toilet</strong>'];
+    labels = ['<div class="labels"><strong>Soort toilet</strong><strong class="reset">Reset filters </strong></div>'];
 
     for (var i = 0; i < toiletsKinds.length; i++) {
 
@@ -204,15 +202,14 @@ let toilets = {
     gewenstToilet: [],
     uriLift: [],
     openBaarToilet: [],
-    openBaarMinderValide: [],
-    onzeker: [],
+    openBaarMinderValide: [],    
     seizoen: [],
     parkeergarage: [],
     unknown: []
 }
 
-setTimeout(() => {
-    let markers = document.querySelectorAll('path');
+function bindToilets() {
+    let markers = document.querySelectorAll('.marker');
     markers.forEach(marker => {
         let color = marker.attributes.fill.nodeValue;   
         switch (color) {
@@ -236,10 +233,6 @@ setTimeout(() => {
                 toilets.openBaarMinderValide.push(marker)
               return marker;
             }
-            case "#fa9fb5": {
-                toilets.onzeker.push(marker)
-              return marker;
-            }
             case "#c51b8a": {
                 toilets.seizoen.push(marker)
               return marker;
@@ -255,7 +248,7 @@ setTimeout(() => {
           }
     });
     console.log(toilets)
-}, 1000);
+}
 
 function filter() {
 
@@ -283,7 +276,9 @@ function filter() {
             singleToilet.classList.remove('hidden')
         })
         if (currentfilter == toiletCategorie){
-            null
+            let previous = document.querySelector('.clicked')
+            previous ? previous.classList.remove('clicked') : null
+            this.classList.add('clicked')
         } else {
             filterToilets.forEach(singleToilet => {
                 singleToilet.classList.add('hidden')
@@ -297,3 +292,13 @@ legenda.forEach(legendaItem => {
     legendaItem.addEventListener('click', filter)
 })
 
+function reset(){
+    Object.keys(toilets).forEach(toiletCategorie => {
+        let filterToilets = (toilets[toiletCategorie])
+        filterToilets.forEach(singleToilet => {
+            singleToilet.classList.remove('hidden')
+        })
+    })
+}
+
+document.querySelector('.reset').addEventListener('click', reset)
