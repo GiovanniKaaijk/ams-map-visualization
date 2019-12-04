@@ -1,4 +1,29 @@
-let mymap = L.map("mapid").setView([52.359189, 4.899431], 14);
+let mapboxUrl = "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}";
+let grayscale = L.tileLayer(mapboxUrl, {
+    attribution:
+      'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: "mapbox/light-v9",
+    accessToken:
+      "pk.eyJ1IjoiZ2lvdmFubmlrYWFpamsiLCJhIjoiY2szcTR0cGJjMDlqcjNpbmpzY3FvNnM2NyJ9.ZjrOail8vBggoDZ6_btYAg"
+  });
+ let streets   = L.tileLayer(mapboxUrl, {
+        attribution:
+          'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+        id: "mapbox/streets-v11",
+        accessToken:
+          "pk.eyJ1IjoiZ2lvdmFubmlrYWFpamsiLCJhIjoiY2szcTR0cGJjMDlqcjNpbmpzY3FvNnM2NyJ9.ZjrOail8vBggoDZ6_btYAg"
+      });
+let mymap = L.map("mapid", {layers: [grayscale]}).setView([52.359189, 4.899431], 14);
+
+var baseMaps = {
+    "Grayscale": grayscale,
+    "Streets": streets
+};
+L.control.layers(baseMaps).addTo(mymap);
+
+
 let cameraStyle = {
     color: "rgba(255, 0, 0, 1)",
     fill: "rgba(255, 0, 0, 1)",
@@ -6,18 +31,48 @@ let cameraStyle = {
     opacity: 1
   };
 
+function getColor(d) {
+let thisnewcolor;
+    switch (d) {
+        case "Amsterdamse krul (m)": {
+            thisnewcolor = "#de2d26";
+          return thisnewcolor;
+        }
+        case "Gewenst toilet": {
+            thisnewcolor = "#31a354";
+          return thisnewcolor;
+        }
+        case "Urilift (m)": {
+            thisnewcolor = "#fdae6b";
+          return thisnewcolor;
+        }
+        case "Openbaar toilet (m/v)": {
+            thisnewcolor = "#addd8e";
+          return thisnewcolor;
+        }
+        case "Openbaar toilet, toegankelijk voor mindervaliden (m/v)": {
+            thisnewcolor = "#7fcdbb";
+          return thisnewcolor;
+        }
+        case "Onzeker": {
+            thisnewcolor = "#fa9fb5";
+          return thisnewcolor;
+        }
+        case "Seizoen (m/v)": {
+            thisnewcolor = "#c51b8a";
+          return thisnewcolor;
+        }
+        case "Toilet in parkeergarage (m/v)": {
+            thisnewcolor = "#edf8b1";
+          return thisnewcolor;
+        }
+        default: { 
+            thisnewcolor = 'steelblue'
+          return thisnewcolor
+        }
+      }
+}
 
-L.tileLayer(
-  "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
-  {
-    attribution:
-      'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-    maxZoom: 18,
-    id: "mapbox/streets-v11",
-    accessToken:
-      "pk.eyJ1IjoiZ2lvdmFubmlrYWFpamsiLCJhIjoiY2szcTR0cGJjMDlqcjNpbmpzY3FvNnM2NyJ9.ZjrOail8vBggoDZ6_btYAg"
-  }
-).addTo(mymap);
 const createMap = async () => {
   let mapJson = await fetchMap();
   rendermap(mapJson);
@@ -59,7 +114,7 @@ const transformToilets = (json) => {
     jsonData.forEach(feature => {
       let newFeatureProps = feature.properties;
       let newcolor = "steelblue";   
-      newcolor = switchcolor(newFeatureProps);
+      newcolor = getColor(newFeatureProps.Soort);
       newFeatureProps = {
         open: newFeatureProps.Dagen_geopend,
         foto: newFeatureProps.Foto,
@@ -76,30 +131,7 @@ const transformToilets = (json) => {
     renderToilets(jsonData)
 }
 
-const switchcolor = (feature) => {
-    switch (feature.Soort) {
-      case "Amsterdamse krul (m)": {
-        newcolor = "#de2d26";
-        return newcolor;
-      }
-      case "Gewenst toilet": {
-        newcolor = "#31a354";
-        return newcolor;
-      }
-      case "Urilift (m)": {
-        newcolor = "#fdae6b";
-        return newcolor;
-      }
-      case "Openbaar toilet (m/v)": {
-        newcolor = "#addd8e";
-        return newcolor;
-      }
-      default: { 
-        newcolor = 'steelblue'
-        return newcolor
-      }
-    }
-  }
+
 
 const renderToilets = (jsonData) => {
     L.geoJSON(jsonData, {
@@ -136,8 +168,6 @@ let polygon = L.polygon([
   [51.51, -0.047]
 ]).addTo(mymap);
 
-//marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
-
 var popup = L.popup();
 
 // function onMapClick(e) {
@@ -148,4 +178,24 @@ var popup = L.popup();
 // }
 
 // mymap.on('click', onMapClick);
-mymap.on('click', function(e) { console.log(e) });
+
+
+let legend = L.control({position: 'bottomleft'});
+    legend.onAdd = function (map) {
+
+    var div = L.DomUtil.create('div', 'info legend');
+    labels = ['<strong>Soort toilet</strong>'],
+    categories = ['Amsterdamse krul (m)','Gewenst toilet','Urilift (m)','Openbaar toilet (m/v)','Openbaar toilet, toegankelijk voor mindervaliden (m/v)', 'Onzeker', 'Seizoen (m/v)','Toilet in parkeergarage (m/v)'];
+
+    for (var i = 0; i < categories.length; i++) {
+
+            div.innerHTML += 
+            labels.push(
+                '<i class="circle" style="background:' + getColor(categories[i]) + '"></i> ' +
+            (categories[i] ? categories[i] : '+'));
+
+        }
+        div.innerHTML = labels.join('<br>');
+    return div;
+    };
+legend.addTo(mymap);
