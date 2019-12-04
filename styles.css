@@ -66,13 +66,13 @@ header {
   margin-top: -20px;
 }
 
-.legendItem {
-  cursor: pointer;
-}
-
 .price {
   display: block;
   margin-top: 10px;
+}
+
+.priceCalc, .reset, .legendItem {
+  cursor: pointer;
 }
 
 .paidHidden {
@@ -93,6 +93,11 @@ header {
   }
   .leaflet-bottom .leaflet-control.legend {
     margin: 0;
+    margin-left: 30px;
+    margin-bottom: 16px;
+  }
+  .leaflet-bottom {
+    bottom: 40px;
   }
 }
 @media only screen and (max-width: 450px) {
