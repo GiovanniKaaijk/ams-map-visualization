@@ -24,3 +24,17 @@ i.circle {
 }
 
 #mapid { height: 715px; }
+
+p {
+  margin: 0;
+  display: inline-block;
+}
+
+path {
+  transition: all .3s;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+}

@@ -15,8 +15,8 @@ let grayscale = L.tileLayer(mapboxUrl, {
         accessToken:
           "pk.eyJ1IjoiZ2lvdmFubmlrYWFpamsiLCJhIjoiY2szcTR0cGJjMDlqcjNpbmpzY3FvNnM2NyJ9.ZjrOail8vBggoDZ6_btYAg"
       });
-let mymap = L.map("mapid", {layers: [grayscale]}).setView([52.359189, 4.899431], 14);
-
+let mymap = L.map("mapid", {layers: [grayscale]}).setView([52.369189, 4.899431], 14);
+let toiletsKinds = ['Amsterdamse krul (m)','Gewenst toilet','Urilift (m)','Openbaar toilet (m/v)','Openbaar toilet, toegankelijk voor mindervaliden (m/v)', 'Onzeker', 'Seizoen (m/v)','Toilet in parkeergarage (m/v)'];
 var baseMaps = {
     "Grayscale": grayscale,
     "Streets": streets
@@ -119,7 +119,7 @@ const transformToilets = (json) => {
         open: newFeatureProps.Dagen_geopend,
         foto: newFeatureProps.Foto,
         desc: newFeatureProps.Omschrijving,
-        open: newFeatureProps.Openingstijden,
+        open: newFeatureProps.Openingstijden ? newFeatureProps.Openingstijden : 'Niet bekend',
         prijs: newFeatureProps.Prijs_per_gebruik,
         selectie: newFeatureProps.SELECTIE,
         soort: newFeatureProps.Soort ? newFeatureProps.Soort : "none",
@@ -147,7 +147,7 @@ const renderToilets = (jsonData) => {
           return L.circleMarker(latlng, geojsonMarkerOptions);
         }
       , onEachFeature: function(feature, featureLayer) {
-            featureLayer.bindPopup(feature.properties.desc +'<br>' + feature.properties.soort);
+            featureLayer.bindPopup(feature.properties.desc +'<br>' + feature.properties.soort + '<br>' + 'Open: ' + feature.properties.open);
     }}).addTo(mymap);
 }
 
@@ -183,19 +183,117 @@ var popup = L.popup();
 let legend = L.control({position: 'bottomleft'});
     legend.onAdd = function (map) {
 
-    var div = L.DomUtil.create('div', 'info legend');
-    labels = ['<strong>Soort toilet</strong>'],
-    categories = ['Amsterdamse krul (m)','Gewenst toilet','Urilift (m)','Openbaar toilet (m/v)','Openbaar toilet, toegankelijk voor mindervaliden (m/v)', 'Onzeker', 'Seizoen (m/v)','Toilet in parkeergarage (m/v)'];
+    let div = L.DomUtil.create('div', 'info legend');
+    labels = ['<strong>Soort toilet</strong>'];
 
-    for (var i = 0; i < categories.length; i++) {
+    for (var i = 0; i < toiletsKinds.length; i++) {
 
             div.innerHTML += 
             labels.push(
-                '<i class="circle" style="background:' + getColor(categories[i]) + '"></i> ' +
-            (categories[i] ? categories[i] : '+'));
+                '<i class="circle" style="background:' + getColor(toiletsKinds[i]) + '"></i> ' +
+            '<p class="legendItem">' + (toiletsKinds[i] ? toiletsKinds[i] : '+') + '</p>');
 
         }
         div.innerHTML = labels.join('<br>');
     return div;
     };
 legend.addTo(mymap);
+
+let toilets = {
+    amsterdamseKrul: [],
+    gewenstToilet: [],
+    uriLift: [],
+    openBaarToilet: [],
+    openBaarMinderValide: [],
+    onzeker: [],
+    seizoen: [],
+    parkeergarage: [],
+    unknown: []
+}
+
+setTimeout(() => {
+    let markers = document.querySelectorAll('path');
+    markers.forEach(marker => {
+        let color = marker.attributes.fill.nodeValue;   
+        switch (color) {
+            case "#de2d26": {
+                toilets.amsterdamseKrul.push(marker);
+              return marker;
+            }
+            case "#31a354": {
+                toilets.gewenstToilet.push(marker);
+              return marker;
+            }
+            case "#fdae6b": {
+                toilets.uriLift.push(marker);
+              return marker;
+            }
+            case "#addd8e": {
+                toilets.openBaarToilet.push(marker)
+              return marker;
+            }
+            case "#7fcdbb": {
+                toilets.openBaarMinderValide.push(marker)
+              return marker;
+            }
+            case "#fa9fb5": {
+                toilets.onzeker.push(marker)
+              return marker;
+            }
+            case "#c51b8a": {
+                toilets.seizoen.push(marker)
+              return marker;
+            }
+            case "#edf8b1": {
+                toilets.parkeergarage.push(marker)
+              return marker;
+            }
+            default: { 
+                toilets.unknown.push(marker)
+              return marker
+            }
+          }
+    });
+    console.log(toilets)
+}, 1000);
+
+function filter() {
+
+    let currentfilter = this.textContent;
+    if(currentfilter == 'Amsterdamse krul (m)'){
+        currentfilter = 'amsterdamseKrul';
+    } else if (currentfilter == 'Gewenst toilet'){
+        currentfilter = 'gewenstToilet'
+    } else if (currentfilter == 'Urilift (m)'){
+        currentfilter = 'uriLift'
+    }else if (currentfilter == 'Openbaar toilet (m/v)'){
+        currentfilter = 'openBaarToilet'
+    }else if (currentfilter == 'Openbaar toilet, toegankelijk voor mindervaliden (m/v)'){
+        currentfilter = 'openBaarMinderValide'
+    }else if (currentfilter == 'Onzeker'){
+        currentfilter = 'onzeker'
+    }else if (currentfilter == 'Seizoen (m/v)'){
+        currentfilter ='seizoen'
+    }else if (currentfilter == 'Toilet in parkeergarage (m/v)'){
+        currentfilter = 'parkeergarage'
+    }
+    Object.keys(toilets).forEach(toiletCategorie => {
+        let filterToilets = (toilets[toiletCategorie])
+        filterToilets.forEach(singleToilet => {
+            singleToilet.classList.remove('hidden')
+        })
+        if (currentfilter == toiletCategorie){
+            null
+        } else {
+            filterToilets.forEach(singleToilet => {
+                singleToilet.classList.add('hidden')
+            })
+        }
+    })
+}
+
+let legenda = document.querySelectorAll('.legendItem')
+legenda.forEach(legendaItem => {
+    legendaItem.addEventListener('click', filter)
+})
+
