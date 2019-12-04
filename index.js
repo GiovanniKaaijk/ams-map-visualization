@@ -16,13 +16,15 @@ let grayscale = L.tileLayer(mapboxUrl, {
           "pk.eyJ1IjoiZ2lvdmFubmlrYWFpamsiLCJhIjoiY2szcTR0cGJjMDlqcjNpbmpzY3FvNnM2NyJ9.ZjrOail8vBggoDZ6_btYAg"
       });
 let mymap = L.map("mapid", {layers: [grayscale]}).setView([52.369189, 4.899431], 14);
-let toiletsKinds = ['Amsterdamse krul (m)','Urilift (m)','Openbaar toilet (m/v)','Openbaar toilet, toegankelijk voor mindervaliden (m/v)', 'Seizoen (m/v)','Toilet in parkeergarage (m/v)'];
+let toiletsKinds = ['Amsterdamse krul (m)','Urilift (m)','Openbaar toilet (m/v)','Openbaar toilet, toegankelijk voor mindervaliden (m/v)', 'Seizoen (m/v)','Toilet in parkeergarage (m/v)','Overig'];
 var baseMaps = {
     "Grayscale": grayscale,
     "Streets": streets
 };
 L.control.layers(baseMaps).addTo(mymap);
-
+let allToilets = [];
+let freeToilets = [];
+let paidToilets = [];
 
 let cameraStyle = {
     color: "rgba(255, 0, 0, 1)",
@@ -116,14 +118,13 @@ const transformToilets = (json) => {
         foto: newFeatureProps.Foto,
         desc: newFeatureProps.Omschrijving,
         open: newFeatureProps.Openingstijden ? newFeatureProps.Openingstijden : 'Niet bekend',
-        prijs: newFeatureProps.Prijs_per_gebruik,
+        prijs: newFeatureProps.Prijs_per_gebruik === 0 ? 'gratis' : '50cent',
         selectie: newFeatureProps.SELECTIE,
         soort: newFeatureProps.Soort ? newFeatureProps.Soort : "none",
         color: newcolor
       };
       feature.properties = newFeatureProps;
     });
-
     renderToilets(jsonData)
 }
 
@@ -139,7 +140,7 @@ const renderToilets = async (jsonData) => {
             weight: 1,
             opacity: 1,
             fillOpacity: 0.8,
-            className: 'marker ' + feature.properties.soort
+            className: 'marker ' + feature.properties.soort + ' ' + feature.properties.prijs
           };
           return L.circleMarker(latlng, geojsonMarkerOptions);
         }
@@ -150,21 +151,6 @@ const renderToilets = async (jsonData) => {
 }
 
 createToilets()
-
-let marker = L.marker([51.5, -0.09]).addTo(mymap);
-
-let circle = L.circle([51.508, -0.11], {
-  color: "red",
-  fillColor: "#f03",
-  fillOpacity: 0.5,
-  radius: 500
-}).addTo(mymap);
-
-let polygon = L.polygon([
-  [51.509, -0.08],
-  [51.503, -0.06],
-  [51.51, -0.047]
-]).addTo(mymap);
 
 var popup = L.popup();
 
@@ -183,16 +169,17 @@ let legend = L.control({position: 'bottomleft'});
 
     let div = L.DomUtil.create('div', 'info legend');
     labels = ['<div class="labels"><strong>Soort toilet</strong><strong class="reset">Reset filters </strong></div>'];
-
+    radio = ['<strong class="price">Gratis?</strong>']
     for (var i = 0; i < toiletsKinds.length; i++) {
 
             div.innerHTML += 
             labels.push(
                 '<i class="circle" style="background:' + getColor(toiletsKinds[i]) + '"></i> ' +
             '<p class="legendItem">' + (toiletsKinds[i] ? toiletsKinds[i] : '+') + '</p>');
-
         }
         div.innerHTML = labels.join('<br>');
+        div.innerHTML += radio
+        div.innerHTML += '<input class="priceCalc" type="radio" id="free" name="price" value="free"><label for="free">Gratis</label><br><input class="priceCalc" type="radio" id="notfree" name="price" value="notfree"><label for="notfree">50 Cent</label>'
     return div;
     };
 legend.addTo(mymap);
@@ -211,7 +198,13 @@ let toilets = {
 function bindToilets() {
     let markers = document.querySelectorAll('.marker');
     markers.forEach(marker => {
-        let color = marker.attributes.fill.nodeValue;   
+        let color = marker.attributes.fill.nodeValue; 
+        allToilets.push(marker)  
+        if(marker.classList.contains('gratis')){
+            freeToilets.push(marker)
+        } else {
+            paidToilets.push(marker)
+        }
         switch (color) {
             case "#de2d26": {
                 toilets.amsterdamseKrul.push(marker);
@@ -247,7 +240,6 @@ function bindToilets() {
             }
           }
     });
-    console.log(toilets)
 }
 
 function filter() {
@@ -292,7 +284,15 @@ legenda.forEach(legendaItem => {
     legendaItem.addEventListener('click', filter)
 })
 
+let radiobuttons = document.querySelectorAll('.priceCalc')
+
 function reset(){
+    radiobuttons.forEach(button => {
+        button.checked = false;
+    })
+    allToilets.forEach(toilet => {
+        toilet.classList.remove('paidHidden')
+    });
     Object.keys(toilets).forEach(toiletCategorie => {
         let filterToilets = (toilets[toiletCategorie])
         filterToilets.forEach(singleToilet => {
@@ -302,3 +302,23 @@ function reset(){
 }
 
 document.querySelector('.reset').addEventListener('click', reset)
+
+
+function changePrice() {
+    allToilets.forEach(toilet => {
+        toilet.classList.remove('paidHidden')
+    });
+    if(this.value == 'free'){
+        paidToilets.forEach(toilet => {
+            toilet.classList.add('paidHidden')
+        })
+    } else {
+        freeToilets.forEach(toilet => {
+            toilet.classList.add('paidHidden')
+        })
+    }
+}
+
+radiobuttons.forEach(button =>{
+    button.addEventListener('click', changePrice)
+})
