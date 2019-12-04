@@ -218,7 +218,7 @@ function bindToilets() {
               return marker;
             }
             case "#31a354": {
-                toilets.gewenstToilet.push(marker);
+                toilets.openBaarToilet.push(marker);
               return marker;
             }
             case "#fdae6b": {
