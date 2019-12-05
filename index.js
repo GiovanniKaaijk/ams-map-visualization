@@ -16,10 +16,10 @@ let grayscale = L.tileLayer(mapboxUrl, {
           "pk.eyJ1IjoiZ2lvdmFubmlrYWFpamsiLCJhIjoiY2szcTR0cGJjMDlqcjNpbmpzY3FvNnM2NyJ9.ZjrOail8vBggoDZ6_btYAg"
       });
 let mymap = L.map("mapid", {layers: [grayscale]}).setView([52.369189, 4.899431], 14);
-let toiletsKinds = ['Amsterdamse krul (m)','Urilift (m)','Openbaar toilet (m/v)','Openbaar toilet, toegankelijk voor mindervaliden (m/v)', 'Seizoen (m/v)','Toilet in parkeergarage (m/v)','Overig'];
+let toiletsKinds = ['Amsterdamse krul (m)','Urilift (m)','Openbaar toilet (m/v)','Openbaar toilet, toegankelijk voor mindervaliden (m/v)','Toilet in parkeergarage (m/v)','Overig'];
 var baseMaps = {
-    "Grayscale": grayscale,
-    "Streets": streets
+    "Zonder context": grayscale,
+    "Met context": streets
 };
 L.control.layers(baseMaps).addTo(mymap);
 let allToilets = [];
@@ -57,7 +57,7 @@ let thisnewcolor;
           return thisnewcolor;
         }
         case "Seizoen (m/v)": {
-            thisnewcolor = "#c51b8a";
+            thisnewcolor = "#31a354";
           return thisnewcolor;
         }
         case "Toilet in parkeergarage (m/v)": {
@@ -118,7 +118,7 @@ const transformToilets = (json) => {
         foto: newFeatureProps.Foto,
         desc: newFeatureProps.Omschrijving,
         open: newFeatureProps.Openingstijden ? newFeatureProps.Openingstijden : 'Niet bekend',
-        prijs: newFeatureProps.Prijs_per_gebruik === 0 ? 'gratis' : '50cent',
+        prijs: newFeatureProps.Prijs_per_gebruik === 0 ? 'gratis' : '50 cent',
         selectie: newFeatureProps.SELECTIE,
         soort: newFeatureProps.Soort ? newFeatureProps.Soort : "none",
         color: newcolor
@@ -145,7 +145,32 @@ const renderToilets = async (jsonData) => {
           return L.circleMarker(latlng, geojsonMarkerOptions);
         }
       , onEachFeature: function(feature, featureLayer) {
-            featureLayer.bindPopup(feature.properties.desc +'<br>' + feature.properties.soort + '<br>' + 'Open: ' + feature.properties.open);
+        let img = '';
+        let gratis = '';
+        let h2 = '';
+        if(feature.properties.soort.includes('Amsterdamse')){
+          img = '<img class="icon" src="./images/Iconen/iconen dataweek_Krultoilet.png" alt="">'
+          h2 = 'Amsterdams krultoilet'
+        } else if (feature.properties.soort.includes('Toilet in parkeergarage')) {
+          img = '<img class="icon" src="./images/Iconen/iconen dataweek_WC in parkeergarage.png" alt="">'
+          h2 = 'Parkeergarage'
+        } else if (feature.properties.soort.includes('Urilift')) {
+          img = '<img class="icon" src="./images/Iconen/iconen dataweek_Urilift.png" alt="">'
+          h2 = 'Urilift'
+        } else if (feature.properties.soort.includes('mindervaliden')) {
+          img = '<img class="icon" src="./images/Iconen/iconen dataweek_Invalidetoilet.png" alt="">'
+          h2 = 'Mindervalide'
+        } else if (feature.properties.soort.includes('Openbaar toilet') || feature.properties.soort.includes('Gewenst toilet') || feature.properties.soort.includes('Seizoen (m/v)')) {
+          img = '<img class="icon" src="./images/Iconen/iconen dataweek_Openbare toilet.png" alt="">'
+          h2 = 'Openbaar toilet'
+        } 
+        h2 = '<h2>' + h2 + '</h2>'
+        
+
+        if(feature.properties.prijs == 'gratis'){
+          gratis = '<img class="icon" src="./images/Iconen/iconen dataweek_Gratis.png" alt="">'
+        }
+            featureLayer.bindPopup(h2 + '<div>' + img + gratis + '</div>' + feature.properties.desc +'<br>' + feature.properties.soort + '<br>' + 'Open: ' + feature.properties.open + '<br>' + 'Kosten: ' + feature.properties.prijs);
     }}).addTo(mymap);
     bindToilets();
 }
@@ -180,6 +205,7 @@ let legend = L.control({position: 'bottomleft'});
         div.innerHTML = labels.join('<br>');
         div.innerHTML += radio
         div.innerHTML += '<input class="priceCalc" type="radio" id="free" name="price" value="free"><label for="free">Gratis</label><br><input class="priceCalc" type="radio" id="notfree" name="price" value="notfree"><label for="notfree">50 Cent</label>'
+        div.innerHTML += "<strong class='camera'>Camera gebieden</strong><i class='circle square' style='background:rgba(255, 0, 0, 1)'></i> <p class='legendItem'>Cameragebied</p>"
     return div;
     };
 legend.addTo(mymap);
