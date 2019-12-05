@@ -146,6 +146,10 @@ i.square {
     text-align: right;
     margin-left: 47%;
   }
+  .icon {
+    width: 30px;
+    height: auto;
+  }
 }
 @media only screen and (max-width: 450px) {
   header h1{
