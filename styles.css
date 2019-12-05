@@ -126,7 +126,7 @@ i.square {
   }
   .leaflet-bottom .leaflet-control.legend {
     margin: auto auto 0 0;
-    margin-bottom: 20px;
+    margin-bottom: 90px;
     opacity: 0;
     pointer-events: none;
     transition: all .3s;
