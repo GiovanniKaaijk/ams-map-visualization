@@ -205,7 +205,7 @@ let legend = L.control({position: 'bottomleft'});
         div.innerHTML = labels.join('<br>');
         div.innerHTML += radio
         div.innerHTML += '<input class="priceCalc" type="radio" id="free" name="price" value="free"><label for="free">Gratis</label><br><input class="priceCalc" type="radio" id="notfree" name="price" value="notfree"><label for="notfree">50 Cent</label>'
-        div.innerHTML += "<strong class='camera'>Camera gebieden</strong><i class='circle square' style='background:rgba(255, 0, 0, 1)'></i> <p class='legendItem'>Cameragebied</p>"
+        div.innerHTML += "<strong class='camera'>Camera gebieden</strong><i class='circle square' style='background:rgba(255, 0, 0, 1)'></i> <p class='legendItem'>Cameragebied</p><p class='closeLegend'>Sluiten</p>"
     return div;
     };
 legend.addTo(mymap);
@@ -347,4 +347,16 @@ function changePrice() {
 
 radiobuttons.forEach(button =>{
     button.addEventListener('click', changePrice)
+})
+
+let legendaBlok = document.querySelector('.leaflet-bottom .leaflet-control.legend');
+let showFilter = document.querySelector('.filter')
+let closeLegend = document.querySelector('.closeLegend')
+showFilter.addEventListener('click', function() {
+  showFilter.classList.toggle('hideFilter')
+  legendaBlok.classList.toggle('show')
+})
+closeLegend.addEventListener('click', function() {
+  showFilter.classList.toggle('hideFilter')
+  legendaBlok.classList.toggle('show')
 })
