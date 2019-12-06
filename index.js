@@ -387,3 +387,9 @@ gratisbutton.addEventListener('click', function() {
   changePrice('freebutton')
   overlay.classList.add('hide')
 })
+
+let animation = document.querySelector('.animation')
+
+setTimeout(() => {
+  animation.classList.add('hide')
+}, 2500);

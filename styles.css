@@ -103,12 +103,32 @@ i.square {
   display: none;
 }
 
-.overlay {
+.overlay, .animation {
   position: absolute;
   width: 100vw;
   height: 100vh;
   background-color: rgb(46,49,146);
   z-index: 100000;
+}
+
+.animation {
+  z-index: 1000000;
+  transition: all .3s;
+}
+
+.animation div {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  display: block;
+}
+.gif {
+  width: 85%;
+  height: auto;
+  margin: 40px auto;
+  display: block;
+  border-radius: 20px;
 }
 
 .white {
@@ -254,6 +274,10 @@ i.square {
     margin: 0 auto;
     margin-top: -40px;
     margin-right: 5px;
+  }
+  .gif {
+    margin-top: 55%;
+    width: 80%;
   }
 }
 @media only screen and (max-width: 450px) {
