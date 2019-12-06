@@ -1,16 +1,23 @@
+@font-face {
+  font-family: "cocobold";
+  src: url("./MyFontsWebfontsKit/webfonts/3AAA8C_0_0.eot");
+  src: url("./MyFontsWebfontsKit/webfonts/3AAA8C_0_0.woff") format("woff");
+}
+p, strong, h2, h1 {
+  font-family: 'cocobold',Helvetica, sans-serif;
+}
 body {
   margin: 0px;
   overflow: hidden;
 }
 h1 {
   text-align: center;
-  font-family: Helvetica, sans-serif;
   color: rgb(46,49,146);
   margin-bottom: 4px;
 }
 
 .leaflet-bottom .leaflet-control.legend {
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.9);
   padding: 10px;
   border-radius: 8px;
   border: 1px solid rgba(33,33,33,.5);
@@ -99,10 +106,17 @@ i.square {
   header {
     grid-template-columns: 1fr 3fr;
   }
+  header h1 {
+    grid-column-start: 2;
+    text-align: right;
+  }
 }
 @media only screen and (max-width: 650px) {
   header h1{
     font-size: 20px;
+    text-align: left;
+    grid-column-start: 2;
+    text-align: right;
   }
   header img.logo {
     width: 150px;
@@ -136,7 +150,7 @@ i.square {
     opacity: 1;
   }
   .leaflet-bottom {
-    bottom: 70px;
+    bottom: 40px;
     width: 100%;
     display: flex;
   }
