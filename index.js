@@ -268,9 +268,13 @@ function bindToilets() {
     });
 }
 
-function filter() {
-
+function filter(invalideFilter) {
     let currentfilter = this.textContent;
+    
+    if(invalideFilter == 'invalide') {
+      currentfilter = 'Openbaar toilet, toegankelijk voor mindervaliden (m/v)';
+    }
+
     if(currentfilter == 'Amsterdamse krul (m)'){
         currentfilter = 'amsterdamseKrul';
     } else if (currentfilter == 'Gewenst toilet'){
@@ -296,7 +300,7 @@ function filter() {
         if (currentfilter == toiletCategorie){
             let previous = document.querySelector('.clicked')
             previous ? previous.classList.remove('clicked') : null
-            this.classList.add('clicked')
+            if(!invalideFilter == 'invalide') { this.classList.add('clicked') }
         } else {
             filterToilets.forEach(singleToilet => {
                 singleToilet.classList.add('hidden')
@@ -330,11 +334,16 @@ function reset(){
 document.querySelector('.reset').addEventListener('click', reset)
 
 
-function changePrice() {
+function changePrice(priceFilter) {
+    let checker = '';
+   checker = this.value;
+  if(priceFilter == 'freebutton') {
+    checker = 'free'
+  }
     allToilets.forEach(toilet => {
         toilet.classList.remove('paidHidden')
     });
-    if(this.value == 'free'){
+    if(checker == 'free'){
         paidToilets.forEach(toilet => {
             toilet.classList.add('paidHidden')
         })
@@ -359,4 +368,22 @@ showFilter.addEventListener('click', function() {
 closeLegend.addEventListener('click', function() {
   showFilter.classList.toggle('hideFilter')
   legendaBlok.classList.toggle('show')
+})
+
+let normalbutton = document.querySelector('.normal');
+let invalidebutton = document.querySelector('.invalide');
+let gratisbutton = document.querySelector('.freebutton');
+let overlay = document.querySelector('.overlay');
+
+normalbutton.addEventListener('click', function() {
+  overlay.classList.add('hide')
+})
+
+invalidebutton.addEventListener('click', function(){
+  filter('invalide')
+  overlay.classList.add('hide')
+})
+gratisbutton.addEventListener('click', function() {
+  changePrice('freebutton')
+  overlay.classList.add('hide')
 })
